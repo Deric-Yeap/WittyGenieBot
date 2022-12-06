@@ -30,7 +30,8 @@ var currentchapter = ""
 //Load contents from txt
 async function loadcontent(){
     for (var i=1; i<18; i++){
-        await fetch(`Let Me Game In Peace/Let Me Game In Peace ${i}.txt`)
+        
+        await fetch(`Let me game in peace/Let Me Game In Peace ${i}.txt`)
         .then(response => response.text())
         .then(text => {
             document.getElementById("content").innerHTML += text
