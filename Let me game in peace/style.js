@@ -9,6 +9,8 @@ for (var theme of themes){
     theme.addEventListener("click", changetheme);
 }
 
+
+//scrolling listener
 var oldScrollY = window.scrollY;
 window.onscroll = function(e) {
     if(oldScrollY >= window.scrollY){
@@ -24,6 +26,7 @@ window.onscroll = function(e) {
     oldScrollY = window.scrollY;
 }
 var currentchapter = ""
+
 //Load contents from txt
 async function loadcontent(){
     for (var i=1; i<18; i++){
@@ -74,7 +77,7 @@ loadcontent();
 
 
 /////////
-
+//Settings
 function changefontsize(event){
     console.log(event.target.value);
     var size = 18 + parseInt(event.target.value);
