@@ -31,7 +31,7 @@ var currentchapter = ""
 async function loadcontent(){
     for (var i=1; i<18; i++){
         
-        await fetch(`Let me game in peace/Let Me Game In Peace ${i}.txt`)
+        await fetch(`Let Me Game In Peace/Let Me Game In Peace ${i}.txt`)
         .then(response => response.text())
         .then(text => {
             document.getElementById("content").innerHTML += text
@@ -132,3 +132,5 @@ function opensidebar(){
 }
 
 
+//Let%20Me%20Game%20In%20Peace%20copy/Let%20Me%20Game%20In%20Peace%201.txt
+//Let%20Me%20Game%20In%20Peace/Let%20Me%20Game%20In%20Peace%202.txt
