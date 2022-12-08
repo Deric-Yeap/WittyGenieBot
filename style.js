@@ -131,6 +131,3 @@ function opensidebar(){
     // }, 100);
 }
 
-
-//Let%20Me%20Game%20In%20Peace%20copy/Let%20Me%20Game%20In%20Peace%201.txt
-//Let%20Me%20Game%20In%20Peace/Let%20Me%20Game%20In%20Peace%202.txt
