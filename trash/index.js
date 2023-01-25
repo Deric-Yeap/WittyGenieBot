@@ -29,14 +29,22 @@ var currentchapter = ""
 
 //Load contents from txt
 async function loadcontent(){
-    let num_of_files = 
+        // Use the createReader method to create a new FileReader object
+    const folder = "LetMeGameInPeace";
+    const reader = folder.createReader();
+
+    // Use the readEntries method to get a list of files in the folder
+    reader.readEntries(function(entries) {
+        console.log("Number of files: " + entries.length);
+    });
+
+    // let num_of_files = 
     for (var i=1; i<18; i++){
         
-        await fetch(`Let Me Game In Peace/Let Me Game In Peace ${i}.txt`)
+        await fetch(`LetMeGameInPeace/Let Me Game In Peace ${i}.txt`)
         .then(response => response.text())
         .then(text => {
             document.getElementById("content").innerHTML += text
-      
         })
     }
     
