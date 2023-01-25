@@ -29,6 +29,7 @@ var currentchapter = ""
 
 //Load contents from txt
 async function loadcontent(){
+    let num_of_files = 
     for (var i=1; i<18; i++){
         
         await fetch(`Let Me Game In Peace/Let Me Game In Peace ${i}.txt`)
