@@ -2,6 +2,7 @@ name: chat
 channels:
   - defaults
 dependencies:
+  - pip
   - pip:
     - playwright
     - python-dotenv
