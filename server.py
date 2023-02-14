@@ -74,6 +74,13 @@ def get_input_box():
 def is_logged_in():
     # See if we have a textarea with data-id="root"
     return get_input_box() is not None
+async def checkStatus() -> bool:
+    page_element = PAGE.query_selector_all("div[class='text-3xl font-medium']")
+    for i in range(page_element):
+        errortext = i.inner_text()
+        print(errortext)
+        if errortext == "ChatGPT is at capacity right now":
+            return True
 
 def send_message(message):
     # Send the message
@@ -265,6 +272,10 @@ async def check_loading(update):
 
 def start_browser():
     PAGE.goto("https://chat.openai.com/")
+    check = checkStatus()
+    print(check)
+    if check == True:
+        print("ChatGPT at full capacity")
     if not is_logged_in():
         print("Please log in to OpenAI Chat")
         print("Press enter when you're done")
