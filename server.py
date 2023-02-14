@@ -9,7 +9,7 @@ from playwright.sync_api import sync_playwright
 from playwright_stealth import stealth_sync
 
 import logging
-
+import speech_recognition as sr
 import dotenv
 import nest_asyncio
 
@@ -34,7 +34,7 @@ if __version_info__ < (20, 0, 0, "alpha", 1):
     )
 from telegram import ForceReply, Update, InlineKeyboardButton, InlineKeyboardMarkup
 
-from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
+from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters,CallbackContext,Updater,filters
 
 from telegram.helpers import escape, escape_markdown
 
@@ -210,6 +210,7 @@ async def respond_with_image(update, response):
                                      parse_mode=telegram.constants.ParseMode.MARKDOWN_V2)
 
 
+
 @auth(USER_ID)
 async def browse(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     message = update.message.text.replace('/browse','')
@@ -241,11 +242,25 @@ I want you to only reply with the output inside and nothing else. Do no write ex
         await respond_with_image(update, response, parse_mode=telegram.constants.ParseMode.MARKDOWN_V2)
     else:
         await update.message.reply_text(response, parse_mode=telegram.constants.ParseMode.MARKDOWN_V2)
+async def voice_handler(update: Update, context: CallbackContext):
+    #initialise voice recognition
+    r = sr.Recognizer()
+    file = await(context.bot.getFile(update.message.voice.file_id))
+     
+    MyText = r.recognize_google(file)
+    MyText = MyText.lower()
+    print(MyText)
 
 @auth(USER_ID)
-async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def echo(update: Update, context: CallbackContext) -> None:
     """Echo the user message."""
     # Send the message to OpenAI
+    # try:
+        # new_file = context.bot.get_file(update.message.voice.file_id)
+        # print(new_file)
+    # except:
+    #Initialize the recognizer 
+   
     send_message(update.message.text)
     await check_loading(update)
     response = get_last_message()
@@ -271,6 +286,7 @@ async def check_loading(update):
 
 
 def start_browser():
+     
     PAGE.goto("https://chat.openai.com/")
     check = checkStatus()
     print(check)
@@ -302,6 +318,8 @@ def start_browser():
             pass
 
     # on different commands - answer in Telegram
+    
+    application.add_handler(MessageHandler(filters.VOICE, voice_handler))
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("reload", reload))
     application.add_handler(CommandHandler("help", help_command))
