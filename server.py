@@ -2,10 +2,10 @@
 import json
 import time
 import os
-
+import subprocess
 import telegram
 from playwright.sync_api import sync_playwright
-
+import ffmpeg
 from playwright_stealth import stealth_sync
 
 import logging
@@ -35,7 +35,6 @@ if __version_info__ < (20, 0, 0, "alpha", 1):
 from telegram import ForceReply, Update, InlineKeyboardButton, InlineKeyboardMarkup
 
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters,CallbackContext,Updater,filters
-
 from telegram.helpers import escape, escape_markdown
 
 if os.environ.get('TELEGRAM_USER_ID'):
@@ -245,9 +244,13 @@ I want you to only reply with the output inside and nothing else. Do no write ex
 async def voice_handler(update: Update, context: CallbackContext):
     #initialise voice recognition
     r = sr.Recognizer()
-    file = await(context.bot.getFile(update.message.voice.file_id))
-     
-    MyText = r.recognize_google(file)
+    new_file = await(context.bot.getFile(update.message.voice.file_id))
+    x = await(new_file.download_to_drive())
+    src_filename = x
+    dest_filename = 'res.mp3'
+    process = subprocess.run(['ffmpeg', '-i', src_filename, dest_filename])
+    
+    MyText = r.recognize_google('res.mp3')
     MyText = MyText.lower()
     print(MyText)
 
