@@ -252,6 +252,7 @@ async def voice_handler(update: Update, context: CallbackContext):
     audiofile = sr.AudioFile('res.wav')
     with audiofile as source:
         audio = r.record(source)
+    print(audio)
     MyText = r.recognize_google(audio)
     MyText = MyText.lower()
     print(MyText)
