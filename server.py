@@ -254,10 +254,15 @@ async def voice_handler(update: Update, context: CallbackContext):
         audio = r.record(source)
     MyText = r.recognize_google(audio)
     MyText = MyText.lower()
-    print(MyText)
     os.remove(src_filename)
     os.remove('res.wav')
-
+    send_message(MyText)
+    await check_loading(update)
+    response = get_last_message()
+    if "\[prompt:" in response:
+        await respond_with_image(update, response)
+    else:
+        await update.message.reply_text(response, parse_mode=telegram.constants.ParseMode.MARKDOWN_V2)
 
 @auth(USER_ID)
 async def echo(update: Update, context: CallbackContext) -> None:
