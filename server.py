@@ -299,7 +299,10 @@ async def check_loading(update):
 
 
 def start_browser():
-     
+    try:
+         os.remove('res.wav')
+    except:
+        print("error")
     PAGE.goto("https://chat.openai.com/")
     check = checkStatus()
     print(check)
