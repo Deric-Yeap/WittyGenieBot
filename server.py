@@ -252,10 +252,12 @@ async def voice_handler(update: Update, context: CallbackContext):
     audiofile = sr.AudioFile('res.wav')
     with audiofile as source:
         audio = r.record(source)
-    print(audio)
     MyText = r.recognize_google(audio)
     MyText = MyText.lower()
     print(MyText)
+    os.remove(src_filename)
+    os.remove('res.wav')
+
 
 @auth(USER_ID)
 async def echo(update: Update, context: CallbackContext) -> None:
