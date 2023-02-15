@@ -247,10 +247,12 @@ async def voice_handler(update: Update, context: CallbackContext):
     new_file = await(context.bot.getFile(update.message.voice.file_id))
     x = await(new_file.download_to_drive())
     src_filename = x
-    dest_filename = 'res.mp3'
+    dest_filename = 'res.wav'
     process = subprocess.run(['ffmpeg', '-i', src_filename, dest_filename])
-    
-    MyText = r.recognize_google('res.mp3')
+    audiofile = sr.AudioFile('res.wav')
+    with audiofile as source:
+        audio = r.record(source)
+    MyText = r.recognize_google(audio)
     MyText = MyText.lower()
     print(MyText)
 
