@@ -300,9 +300,9 @@ async def check_loading(update):
 
 def start_browser():
     try:
-         os.remove('res.wav')
+        os.remove('res.wav')
     except:
-        print("error")
+        print("error removing audio")
     PAGE.goto("https://chat.openai.com/")
     check = checkStatus()
     print(check)
