@@ -75,6 +75,7 @@ def is_logged_in():
     # See if we have a textarea with data-id="root"
     return get_input_box() is not None
 async def checkStatus() -> bool:
+    print(PAGE.locator(':has-text("ChatGPT is at capacity right now")'))
     page_element = PAGE.query_selector_all("div[class='text-3xl font-medium']")
     for i in range(page_element):
         errortext = i.inner_text()
@@ -270,17 +271,26 @@ async def voice_handler(update: Update, context: CallbackContext):
     audiofile = sr.AudioFile('res.wav')
     with audiofile as source:
         audio = r.record(source)
-    MyText = r.recognize_google(audio)
-    MyText = MyText.lower()
+        try:
+            MyText = r.recognize_google(audio)
+            MyText = MyText.lower()
+            # os.remove(src_filename)
+            # os.remove('res.wav')
+            send_message(MyText)
+            await check_loading(update)
+            response = get_last_message()
+            if "\[prompt:" in response:
+                await respond_with_image(update, response)
+            else:
+                await update.message.reply_text(response, parse_mode=telegram.constants.ParseMode.MARKDOWN_V2)
+
+
+        except Exception as e:
+            response = "We did not recognise any text from the audio, please try again"
+            await update.message.reply_text(response, parse_mode=telegram.constants.ParseMode.MARKDOWN_V2)
     os.remove(src_filename)
     os.remove('res.wav')
-    send_message(MyText)
-    await check_loading(update)
-    response = get_last_message()
-    if "\[prompt:" in response:
-        await respond_with_image(update, response)
-    else:
-        await update.message.reply_text(response, parse_mode=telegram.constants.ParseMode.MARKDOWN_V2)
+
 
 @auth(user_dict)
 async def echo(update: Update, context: CallbackContext) -> None:
@@ -316,7 +326,6 @@ def start_browser():
         print("error removing audio")
     PAGE.goto("https://chat.openai.com/")
     check = checkStatus()
-    print(check)
     if check == True:
         print("ChatGPT at full capacity")
     if not is_logged_in():
