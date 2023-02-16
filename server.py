@@ -37,8 +37,8 @@ from telegram import ForceReply, Update, InlineKeyboardButton, InlineKeyboardMar
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters,CallbackContext,Updater,filters
 from telegram.helpers import escape, escape_markdown
 
-if os.environ.get('TELEGRAM_USER_ID'):
-    USER_ID = int(os.environ.get('TELEGRAM_USER_ID'))
+if os.environ.get('TELEGRAM_USER_PASSWORD'):
+    AUTHENTICATION = int(os.environ.get('TELEGRAM_USER_PASSWORD'))
 
 if os.environ.get('OPEN_AI_EMAIL'):
     OPEN_AI_EMAIL = os.environ.get('OPEN_AI_EMAIL')
@@ -52,6 +52,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+user_dict = {}
 
 PLAY = sync_playwright().start()
 # Chrome doesnt seem to work in headless, so we use firefox
@@ -123,32 +124,46 @@ def get_last_message():
     return response
 
 # create a decorator called auth that receives USER_ID as an argument with wraps
-def auth(user_id):
+# authentication
+def auth(user_dict):
     def decorator(func):
         @wraps(func)
         async def wrapper(update, context):
-            if True:
+            userid = update.message.from_user.id
+            if userid in user_dict:
                 await func(update, context)
             else:
-                await update.message.reply_text("You are not authorized to use this bot")
+                receive_pin(update, context, user_dict)
+                if userid in user_dict:
+                    await update.message.reply_text(" Welcome to WittyGenieBot, your virtual assistant here to help you with any questions or tasks you may have! Our team has designed this bot to make your experience seamless and enjoyable, just send us a text or voice message!")
+                else:
+                    await update.message.reply_text("You are not authorized to use this bot, input pin again to continue.")
         return wrapper
     return decorator
 
-@auth(USER_ID)
+def receive_pin(update: Update, context: CallbackContext, user_dict) -> None:
+    userid = update.message.from_user.id
+    if userid not in user_dict:
+        input_message = update.message.text 
+        if input_message == "123456":
+            user_dict[userid] = True
+
+
+#ask pin number for authentication
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /start is issued."""
     user = update.effective_user
     await update.message.reply_html(
-        rf"Hi {user.mention_html()}!",
+        rf"Hi {user.mention_html()}! Please input 6 digit pin number to use this service",
         reply_markup=ForceReply(selective=True),
     )
 
-@auth(USER_ID)
+@auth(user_dict)
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /help is issued."""
     await update.message.reply_text("Help!")
 
-@auth(USER_ID)
+@auth(user_dict)
 async def reload(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /help is issued."""
     print(f"Got a reload command from user {update.effective_user.id}")
@@ -156,7 +171,7 @@ async def reload(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text("Reloaded the browser!")
     await update.message.reply_text("Let's check if it's workin!")
 
-@auth(USER_ID)
+@auth(user_dict)
 async def draw(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     print(f"Got a draw command from user {update.effective_user.id} with prompt {update.message.text}")
 
@@ -210,7 +225,7 @@ async def respond_with_image(update, response):
 
 
 
-@auth(USER_ID)
+@auth(user_dict)
 async def browse(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     message = update.message.text.replace('/browse','')
     await application.bot.send_chat_action(update.effective_chat.id, "typing")
@@ -241,11 +256,14 @@ I want you to only reply with the output inside and nothing else. Do no write ex
         await respond_with_image(update, response, parse_mode=telegram.constants.ParseMode.MARKDOWN_V2)
     else:
         await update.message.reply_text(response, parse_mode=telegram.constants.ParseMode.MARKDOWN_V2)
+
+# convert audio file to message
 async def voice_handler(update: Update, context: CallbackContext):
     #initialise voice recognition
     r = sr.Recognizer()
     new_file = await(context.bot.getFile(update.message.voice.file_id))
     x = await(new_file.download_to_drive())
+    print(x)
     src_filename = x
     dest_filename = 'res.wav'
     process = subprocess.run(['ffmpeg', '-i', src_filename, dest_filename])
@@ -264,16 +282,9 @@ async def voice_handler(update: Update, context: CallbackContext):
     else:
         await update.message.reply_text(response, parse_mode=telegram.constants.ParseMode.MARKDOWN_V2)
 
-@auth(USER_ID)
+@auth(user_dict)
 async def echo(update: Update, context: CallbackContext) -> None:
     """Echo the user message."""
-    # Send the message to OpenAI
-    # try:
-        # new_file = context.bot.get_file(update.message.voice.file_id)
-        # print(new_file)
-    # except:
-    #Initialize the recognizer 
-   
     send_message(update.message.text)
     await check_loading(update)
     response = get_last_message()
