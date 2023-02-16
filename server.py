@@ -58,7 +58,7 @@ PLAY = sync_playwright().start()
 # Chrome doesnt seem to work in headless, so we use firefox
 BROWSER = PLAY.firefox.launch_persistent_context(
     user_data_dir="/tmp/playwright",
-    headless=(os.getenv('HEADLESS_BROWSER', 'False') == 'True')
+    headless=(True)
 )
 PAGE = BROWSER.new_page()
 stealth_sync(PAGE)
@@ -74,14 +74,13 @@ def get_input_box():
 def is_logged_in():
     # See if we have a textarea with data-id="root"
     return get_input_box() is not None
-async def checkStatus() -> bool:
-    print(PAGE.locator(':has-text("ChatGPT is at capacity right now")'))
-    page_element = PAGE.query_selector_all("div[class='text-3xl font-medium']")
-    for i in range(page_element):
+def status() -> bool:
+    page_element = PAGE.query_selector_all("div")
+    for i in page_element:
         errortext = i.inner_text()
-        print(errortext)
-        if errortext == "ChatGPT is at capacity right now":
-            return True
+        if "at capacity" in errortext:
+            print("at cap")
+            return False
 
 def send_message(message):
     # Send the message
@@ -320,38 +319,34 @@ async def check_loading(update):
 
 
 def start_browser():
-    try:
-        os.remove('res.wav')
-    except:
-        print("error removing audio")
     PAGE.goto("https://chat.openai.com/")
-    check = checkStatus()
-    if check == True:
-        print("ChatGPT at full capacity")
+    if(not status()):
+        return
     if not is_logged_in():
-        print("Please log in to OpenAI Chat")
-        print("Press enter when you're done")
+
+        login_button = PAGE.locator("button", has_text="Log in")
+        login_button.click()
         
-        PAGE.locator("button", has_text="Log in").click()
 
         username = PAGE.locator('input[name="username"]')
         username.fill(OPEN_AI_EMAIL)
         username.press("Enter")
+
 
         password = PAGE.locator('input[name="password"]')
         password.fill(OPEN_AI_PASSWORD)
         password.press("Enter")
         
         # On first login
-        try:
-            next_button = PAGE.locator("button", has_text="Next")
-            next_button.click()
-            next_button = PAGE.locator("button", has_text="Next")
-            next_button.click()
-            next_button = PAGE.locator("button", has_text="Done")
-            next_button.click()
-        except:
-            pass
+        # try:
+            
+        #     next_button = PAGE.locator("button", has_text="Next")
+        #     next_button.click()
+        #     next_button = PAGE.locator("button", has_text="Done")
+        #     next_button.click()
+        # except:
+        #     print("Error logging in to chatGPT")
+        #     pass
 
     # on different commands - answer in Telegram
     
