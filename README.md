@@ -12,7 +12,7 @@ python server.py
 build docker image:
 docker build -t geniebot .
 Run docker image:
-docker run -dp 3000:3000 geniebot
+docker run geniebot
 Show docker images:
 docker ps
 Stop docker:
