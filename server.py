@@ -36,6 +36,7 @@ from telegram import ForceReply, Update, InlineKeyboardButton, InlineKeyboardMar
 
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters,CallbackContext,Updater,filters
 from telegram.helpers import escape, escape_markdown
+import time
 
 if os.environ.get('TELEGRAM_USER_PASSWORD'):
     AUTHENTICATION = int(os.environ.get('TELEGRAM_USER_PASSWORD'))
@@ -58,7 +59,7 @@ PLAY = sync_playwright().start()
 # Chrome doesnt seem to work in headless, so we use firefox
 BROWSER = PLAY.firefox.launch_persistent_context(
     user_data_dir="/tmp/playwright",
-    headless=(True)
+    headless=(False)
 )
 PAGE = BROWSER.new_page()
 stealth_sync(PAGE)
@@ -75,12 +76,14 @@ def is_logged_in():
     # See if we have a textarea with data-id="root"
     return get_input_box() is not None
 def status() -> bool:
+    time.sleep(1)
     page_element = PAGE.query_selector_all("div")
     for i in page_element:
         errortext = i.inner_text()
         if "at capacity" in errortext:
             print("at cap")
             return False
+    return True
 
 def send_message(message):
     # Send the message
@@ -337,13 +340,16 @@ def start_browser():
         password.fill(OPEN_AI_PASSWORD)
         password.press("Enter")
         
+        next_button = PAGE.locator("button", has_text="Next")
+        next_button.click()
+        next_button = PAGE.locator("button", has_text="Next")
+        next_button.click()
+        next_button = PAGE.locator("button", has_text="Done")
+        next_button.click()
         # On first login
         # try:
             
-        #     next_button = PAGE.locator("button", has_text="Next")
-        #     next_button.click()
-        #     next_button = PAGE.locator("button", has_text="Done")
-        #     next_button.click()
+
         # except:
         #     print("Error logging in to chatGPT")
         #     pass
