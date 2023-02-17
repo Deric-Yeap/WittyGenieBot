@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.28.1-jammy AS base
+FROM mcr.microsoft.com/playwright:v1.30.0-jammy AS base
 
 FROM base
 RUN apt-get update -y && apt-get install -y python3-pip
